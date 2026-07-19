@@ -41,7 +41,7 @@ header{
 }
 
 .logo-image{
-    height:44px;
+    height:64px;
     width:auto;
 }
 
@@ -429,7 +429,7 @@ footer{
     }
 
     .logo-image{
-        height:36px;
+        height:52px;
     }
 
     .menu-grid, #vendorOrders, #foodList{
