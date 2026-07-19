@@ -1,189 +1,65 @@
-const orderHistory =
-    JSON.parse(localStorage.getItem("orders")) || [];
+const recommendationContainer = document.getElementById("recommendationContainer");
 
-const recommendationContainer =
-    document.getElementById(
-        "recommendationContainer"
-    );
+async function generateRecommendations() {
+    // The phone number, if this browser has one saved (from scanning a
+    // table QR / a previous checkout), lets us pull this customer's real
+    // order history from the database - not just what's in localStorage.
+    const phoneNumber = localStorage.getItem("phoneNumber") || "";
 
-function generateRecommendations(){
+    if (!recommendationContainer) return;
+    recommendationContainer.innerHTML = "<p>Finding your picks...</p>";
 
-    const scores = {};
+    try {
+        const res = await fetch("getRecommendations.php?phone=" + encodeURIComponent(phoneNumber));
+        const data = await res.json();
+        displayRecommendations(data.recommendations || [], data.personalized);
+    } catch (error) {
+        console.error("Failed to load recommendations:", error);
+        recommendationContainer.innerHTML = "<p>Couldn't load recommendations right now.</p>";
+    }
+}
 
-    foods.forEach(food => {
-        scores[food.id] = 0;
-    });
+function displayRecommendations(recommendedFoods, personalized) {
+    if (!recommendationContainer) return;
 
-    const allOrderedItems = [];
-
-    orderHistory.forEach(order => {
-
-        order.items.forEach(item => {
-
-            allOrderedItems.push(item);
-
-        });
-
-    });
-
-    /* ----------------------------
-       1. FREQUENCY SCORE
-    ----------------------------- */
-
-    allOrderedItems.forEach(item => {
-
-        scores[item.id] += 40;
-
-    });
-
-    /* ----------------------------
-       2. CATEGORY PREFERENCE
-    ----------------------------- */
-
-    const categoryCount = {};
-
-    allOrderedItems.forEach(item => {
-
-        categoryCount[item.category] =
-            (categoryCount[item.category] || 0) + 1;
-
-    });
-
-    foods.forEach(food => {
-
-        if(categoryCount[food.category]){
-
-            scores[food.id] +=
-                categoryCount[food.category] * 10;
-
-        }
-
-    });
-
-    /* ----------------------------
-       3. RECENT ORDER SCORE
-    ----------------------------- */
-
-    const latestOrder =
-        orderHistory[orderHistory.length - 1];
-
-    if(latestOrder){
-
-        latestOrder.items.forEach(item => {
-
-            foods.forEach(food => {
-
-                if(
-                    food.category === item.category
-                ){
-                    scores[food.id] += 25;
-                }
-
-            });
-
-        });
-
+    if (recommendedFoods.length === 0) {
+        recommendationContainer.innerHTML = "<p>No recommendations available yet.</p>";
+        return;
     }
 
-    /* ----------------------------
-       4. COMBO MATCHING
-    ----------------------------- */
+    const heading = personalized
+        ? "<p class='ai-picks-note'>Based on your order history</p>"
+        : "<p class='ai-picks-note'>Popular picks right now</p>";
 
-    const combos = {
-
-        "Nestum Chicken Rice":
-            "Teh Ais",
-
-        "Ayam Penyet Set Rice":
-            "Milo Ais",
-
-        "Lemon Chicken Set Rice":
-            "Teh Ais",
-
-        "Tomyam Fried Rice":
-            "Milo Ais"
-    };
-
-    allOrderedItems.forEach(item => {
-
-        const comboDrink =
-            combos[item.name];
-
-        if(comboDrink){
-
-            foods.forEach(food => {
-
-                if(food.name === comboDrink){
-
-                    scores[food.id] += 20;
-
-                }
-
-            });
-
-        }
-
-    });
-
-    /* ----------------------------
-       SORT BY SCORE
-    ----------------------------- */
-
-    const rankedFoods =
-        [...foods]
-        .sort(
-            (a,b)=>
-            scores[b.id]-scores[a.id]
-        )
-        .slice(0,4);
-
-    displayRecommendations(
-        rankedFoods,
-        scores
-    );
-}
-
-function displayRecommendations(
-    recommendedFoods,
-    scores
-){
-
-    recommendationContainer.innerHTML = "";
-
-    recommendedFoods.forEach(food => {
-
-        recommendationContainer.innerHTML += `
+    recommendationContainer.innerHTML = heading + recommendedFoods.map(food => `
         <div class="feature-card">
-
-            ${
-                food.foodImage
-                ?
-                `<img
-                src="${food.foodImage}"
-                class="foodImage">`
-                :
-                `<div class="food-icon">
-                    ${food.icon}
-                </div>`
+            ${food.image
+                ? `<img src="${food.image}" class="foodImage" onerror="this.src='images/default.png'">`
+                : `<div class="food-icon">🍽️</div>`
             }
-
             <h3>${food.name}</h3>
-
-            <p>${food.desc}</p>
-
-            <h4>
-                RM ${food.price.toFixed(2)}
-            </h4>
-
-            <p>
-                AI Score:
-                ${scores[food.id]}
-            </p>
-
+            <p>${food.description || ''}</p>
+            <h4>RM ${parseFloat(food.price).toFixed(2)}</h4>
+            <button onclick="addRecommendedToCart(${food.id}, '${food.name.replace(/'/g, "\\'")}', ${food.price}, '${(food.image || '').replace(/'/g, "\\'")}')">
+                Add To Cart
+            </button>
         </div>
-        `;
-    });
-
+    `).join('');
 }
 
-generateRecommendations();
+function addRecommendedToCart(id, name, price, image) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const existingItem = cart.find(item => item.id == id);
+
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        cart.push({ id, name, price: parseFloat(price), quantity: 1, image });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    if (typeof loadCart === 'function') loadCart();
+    alert(`${name} added to cart!`);
+}
+
+document.addEventListener("DOMContentLoaded", generateRecommendations);

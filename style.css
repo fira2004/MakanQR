@@ -18,6 +18,11 @@ body{
     color:var(--navy);
 }
 
+img{
+    max-width:100%;
+    height:auto;
+}
+
 /* HEADER */
 
 header{
@@ -33,6 +38,11 @@ header{
 
 .logo h2{
     font-size:1.5rem;
+}
+
+.logo-image{
+    height:44px;
+    width:auto;
 }
 
 nav{
@@ -357,6 +367,108 @@ footer{
     nav{
         flex-wrap:wrap;
         justify-content:center;
+    }
+
+    /* Menu + cart sidebar: stack instead of squeezing into two narrow
+       columns. Cart moves below the menu and stops being sticky (a sticky
+       sidebar makes no sense once it's full-width and stacked). */
+    .menu-layout{
+        grid-template-columns: 1fr;
+    }
+
+    .cart-sidebar{
+        position:static;
+        order:2;
+    }
+
+    .menu-section{
+        order:1;
+    }
+
+    /* Checkout: left (items/payment) and right (summary) stack instead of
+       being squeezed side by side. */
+    .checkout-layout{
+        flex-direction:column;
+        gap:20px;
+    }
+
+    .checkout-right{
+        order:-1; /* Summary/total first on mobile, so the price is visible before scrolling past the form */
+    }
+
+    .menu-page{
+        padding:40px 5%;
+    }
+
+    .dashboard{
+        padding:40px 5%;
+    }
+}
+
+@media(max-width:600px){
+
+    .hero-content h1{
+        font-size:2.2rem;
+    }
+
+    .menu-title h1{
+        font-size:2rem;
+    }
+
+    header{
+        padding:15px 5%;
+    }
+
+    nav{
+        gap:14px;
+        font-size:0.9rem;
+    }
+
+    .logo h2{
+        font-size:1.2rem;
+    }
+
+    .logo-image{
+        height:36px;
+    }
+
+    .menu-grid, #vendorOrders, #foodList{
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-grid{
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card{
+        padding:16px;
+    }
+
+    .checkout-card input,
+    .checkout-card textarea{
+        font-size:16px; /* prevents iOS Safari auto-zooming in on focus */
+    }
+
+    table{
+        font-size:0.8rem;
+    }
+
+    th, td{
+        padding:8px 6px;
+    }
+
+    .receipt-wrap{
+        margin:20px auto;
+        padding:20px 16px;
+    }
+
+    .tng-wrap, .scan-wrap{
+        margin:24px auto;
+        padding:24px 20px;
+    }
+
+    .payment-option{
+        font-size:0.95rem;
     }
 }
 
@@ -767,6 +879,7 @@ footer{
     right:-400px;
 
     width:380px;
+    max-width:100vw;
     height:100vh;
 
     background:white;
@@ -859,6 +972,13 @@ footer{
 .dashboard h1{
     margin-bottom:10px;
     margin-top:20px;
+}
+
+.ai-picks-note {
+    grid-column: 1 / -1;
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: 10px;
 }
 
 .analytics-grid{

@@ -32,8 +32,8 @@
 
 </section>
 
-<script src="food.js"></script>
 <script src="recommendation.js"></script>
+<script src="cart.js"></script>
 
 </body>
 </html>
