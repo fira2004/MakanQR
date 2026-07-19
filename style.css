@@ -1463,6 +1463,31 @@ textarea:focus{
     background: #10b981;
 }
 
+/* Vendor order card action buttons: the button matching the order's
+   current status gets highlighted and disabled, so it's obvious at a
+   glance which stage the order is in without reading the small text label. */
+.status-btn-active {
+    color: white !important;
+    cursor: default;
+    opacity: 1 !important;
+}
+
+.status-btn-active.preparing {
+    background: #3b82f6 !important;
+}
+
+.status-btn-active.ready {
+    background: #8b5cf6 !important;
+}
+
+.status-btn-active.completed {
+    background: #10b981 !important;
+}
+
+#vendorOrders .order-card > button:disabled {
+    cursor: default;
+}
+
 .order-time {
     color: #666;
     font-size: 0.9rem;
@@ -1579,6 +1604,11 @@ textarea:focus{
     cursor: pointer;
     font-weight: 600;
     transition: 0.3s;
+}
+
+#vendorOrders .order-card > button:disabled:not(.status-btn-active) {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 #vendorOrders .order-card > button:nth-of-type(1):hover { background: #3b82f6; color: white; }
